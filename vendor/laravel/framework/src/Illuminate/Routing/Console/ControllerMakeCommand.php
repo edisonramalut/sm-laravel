@@ -17,6 +17,14 @@ class ControllerMakeCommand extends GeneratorCommand
     protected $name = 'make:controller';
 
     /**
+     * The form request names to be created when
+     * form request option is used.
+     *
+     * @var string
+     */
+    protected $formRequests = ["Store", "Update", "Delete"];
+
+    /**
      * The console command description.
      *
      * @var string
@@ -42,11 +50,22 @@ class ControllerMakeCommand extends GeneratorCommand
         if ($this->option('parent')) {
             $stub = '/stubs/controller.nested.stub';
         } elseif ($this->option('model')) {
-            $stub = '/stubs/controller.model.stub';
+            if ($this->option('form-request')) {
+                $stub = '/stubs/controller.model.request.stub';
+            } else {
+                $stub = '/stubs/controller.model.stub';
+            }
         } elseif ($this->option('invokable')) {
             $stub = '/stubs/controller.invokable.stub';
         } elseif ($this->option('resource')) {
             $stub = '/stubs/controller.stub';
+        } elseif ($this->option('form-request')) {
+            if ($this->option('model')) {
+                $stub = '/stubs/controller.model.request.stub';
+            } else {
+                $stub = '/stubs/controller.request.stub';
+            }
+
         }
 
         if ($this->option('api') && is_null($stub)) {
@@ -72,6 +91,17 @@ class ControllerMakeCommand extends GeneratorCommand
     }
 
     /**
+     * Get the default namespace for the form request classes.
+     *
+     * @param  string  $rootNamespace
+     * @return string
+     */
+    protected function getDefaultFormRequestNamespace()
+    {
+        $rootNamespace = $this->laravel->getNamespace();
+        return $rootNamespace.'Http\Requests';
+    }
+    /**
      * Build the class with the given name.
      *
      * Remove the base controller import if we are already in base namespace.
@@ -91,6 +121,10 @@ class ControllerMakeCommand extends GeneratorCommand
 
         if ($this->option('model')) {
             $replace = $this->buildModelReplacements($replace);
+        }
+
+        if ($this->option('form-request')) {
+            $replace = $this->buildFormRequestReplacements($replace, $name);
         }
 
         $replace["use {$controllerNamespace}\Controller;\n"] = '';
@@ -146,6 +180,43 @@ class ControllerMakeCommand extends GeneratorCommand
     }
 
     /**
+     * Build the form request replacement values.
+     *
+     * @param  $replace
+     * @param  $name
+     * @return void
+     */
+    protected function buildFormRequestReplacements($replace, $name)
+    {
+        $storeRequest = $updateRequest = $deleteRequest = '';
+        foreach ($this->formRequests as $formRequest) {
+            //get the name of the object to use for the Request classes.
+            $requestName = $this->getObjectName($this->input->getArgument('name'));
+            $formRequestClassName = $formRequest.$requestName;
+            //get the full path of the objects so we can reference them correctly in the generated files.
+            $fullPathFormRequestClassName = $this->getDefaultFormRequestNamespace().'\\'.$formRequestClassName;
+            if ($formRequest == 'Store') {
+                $storeRequest = $fullPathFormRequestClassName;
+            } elseif ($formRequest == 'Update') {
+                $updateRequest = $fullPathFormRequestClassName;
+            } elseif ($formRequest == 'Delete') {
+                $deleteRequest = $fullPathFormRequestClassName;
+            }
+            $this->call('make:request', ['name' =>$formRequestClassName]);
+        }
+
+        return array_merge($replace, [
+            'DummyFullStoreRequest' => $storeRequest,
+            'DummyFullUpdateRequest' => $updateRequest,
+            'DummyFullDeleteRequest' => $deleteRequest,
+            'DummyUpdateRequest' => class_basename($updateRequest),
+            'DummyStoreRequest' => class_basename($storeRequest),
+            'DummyDeleteRequest' => class_basename($deleteRequest),
+        ]);
+
+    }
+
+    /**
      * Get the fully-qualified model class name.
      *
      * @param  string  $model
@@ -164,7 +235,6 @@ class ControllerMakeCommand extends GeneratorCommand
         if (! Str::startsWith($model, $rootNamespace = $this->laravel->getNamespace())) {
             $model = $rootNamespace.$model;
         }
-
         return $model;
     }
 
@@ -177,6 +247,7 @@ class ControllerMakeCommand extends GeneratorCommand
     {
         return [
             ['model', 'm', InputOption::VALUE_OPTIONAL, 'Generate a resource controller for the given model.'],
+            ['form-request', 'f', InputOption::VALUE_NONE, 'Generate basic Form Request classes for the controller.'],
             ['resource', 'r', InputOption::VALUE_NONE, 'Generate a resource controller class.'],
             ['invokable', 'i', InputOption::VALUE_NONE, 'Generate a single method, invokable controller class.'],
             ['parent', 'p', InputOption::VALUE_OPTIONAL, 'Generate a nested resource controller class.'],

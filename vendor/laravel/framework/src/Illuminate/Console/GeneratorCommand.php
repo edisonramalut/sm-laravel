@@ -134,6 +134,19 @@ abstract class GeneratorCommand extends Command
     }
 
     /**
+     * Extract the object name out of the new Controller name.
+     *
+     * @param  string  $name
+     * @return string
+     */
+    protected function getObjectName($controllerName)
+    {
+       $name = Str::replaceFirst('Controller', '', $controllerName);
+
+       return $name;
+    }
+
+    /**
      * Build the directory for the class if necessary.
      *
      * @param  string  $path
