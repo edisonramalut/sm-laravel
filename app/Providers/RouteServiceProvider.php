@@ -2,11 +2,31 @@
 
 namespace App\Providers;
 
+use App\Http\Controllers\HomeController;
+use Illuminate\Routing\Controller;
+use Illuminate\Routing\Router;
+use Illuminate\Routing\RouteRegistrar;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 
 class RouteServiceProvider extends ServiceProvider
 {
+    /**
+     * Default prefix for controller defined routes in this service provider.
+     *
+     * @var string
+     */
+    protected $prefix = '';
+
+    /**
+     * The controllers to load routes definitions from.
+     * We define all the controller classes here before
+     * using the routes function.
+     *
+     * @var array
+     */
+    protected $controllers = [ HomeController::class ];
+
     /**
      * This namespace is applied to your controller routes.
      *
@@ -19,13 +39,23 @@ class RouteServiceProvider extends ServiceProvider
     /**
      * Define your route model bindings, pattern filters, etc.
      *
+     * @param RouteRegistrar $routeRegistrar
      * @return void
      */
-    public function boot()
+    public function boot(RouteRegistrar $routeRegistrar)
     {
         //
+        parent::boot($routeRegistrar);
+    }
 
-        parent::boot();
+    /**
+     * @param RouteRegistrar $routeRegistrar
+     * @throws \Exception
+     */
+    protected function loadRoutes(RouteRegistrar $routeRegistrar)
+    {
+        parent::loadRoutes($routeRegistrar);
+        $this->loadRoutesFromControllers($routeRegistrar);
     }
 
     /**
@@ -69,5 +99,29 @@ class RouteServiceProvider extends ServiceProvider
              ->middleware('api')
              ->namespace($this->namespace)
              ->group(base_path('routes/api.php'));
+    }
+
+    /**
+     * Define the routes for the application.
+     *
+     * @param  RouteRegistrar  $routeRegistrar
+     * @throws \Exception
+     */
+    protected function loadRoutesFromControllers(RouteRegistrar $routeRegistrar)
+    {
+        foreach ($this->controllers as $controller) {
+            $controller = $this->app->make($controller);
+
+            if (!is_a($controller, Controller::class)) {
+                throw new \Exception('Controller class must extend ' . Controller::class);
+            }
+
+
+            $routeRegistrar
+                ->prefix($this->prefix . $controller->prefix)
+                ->group(function (Router $router) use ($controller) {
+                    $controller->routes($router);
+                });
+        }
     }
 }

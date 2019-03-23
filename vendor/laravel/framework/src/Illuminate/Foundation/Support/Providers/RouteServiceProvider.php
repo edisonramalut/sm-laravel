@@ -6,6 +6,7 @@ use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Traits\ForwardsCalls;
 use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Routing\RouteRegistrar;
 
 /**
  * @mixin \Illuminate\Routing\Router
@@ -26,14 +27,14 @@ class RouteServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
+    public function boot(RouteRegistrar $routeRegistrar)
     {
         $this->setRootControllerNamespace();
 
         if ($this->routesAreCached()) {
             $this->loadCachedRoutes();
         } else {
-            $this->loadRoutes();
+            $this->loadRoutes($routeRegistrar);
 
             $this->app->booted(function () {
                 $this->app['router']->getRoutes()->refreshNameLookups();
@@ -78,10 +79,10 @@ class RouteServiceProvider extends ServiceProvider
 
     /**
      * Load the application routes.
-     *
+     * @param RouteRegistrar $routeRegistrar
      * @return void
      */
-    protected function loadRoutes()
+    protected function loadRoutes(RouteRegistrar $routeRegistrar)
     {
         if (method_exists($this, 'map')) {
             $this->app->call([$this, 'map']);
