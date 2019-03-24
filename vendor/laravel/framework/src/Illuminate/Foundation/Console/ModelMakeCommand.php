@@ -30,6 +30,17 @@ class ModelMakeCommand extends GeneratorCommand
     protected $type = 'Model';
 
     /**
+     * Get the default namespace for the class.
+     *
+     * @param  string  $rootNamespace
+     * @return string
+     */
+    protected function getDefaultNamespace($rootNamespace)
+    {
+        return $rootNamespace.'\Http\Models';
+    }
+
+    /**
      * Execute the console command.
      *
      * @return void

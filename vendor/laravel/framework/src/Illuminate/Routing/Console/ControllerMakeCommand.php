@@ -101,6 +101,19 @@ class ControllerMakeCommand extends GeneratorCommand
         $rootNamespace = $this->laravel->getNamespace();
         return $rootNamespace.'Http\Requests';
     }
+
+    /**
+     * Get the default namespace for the model classes.
+     *
+     * @param  string  $rootNamespace
+     * @return string
+     */
+    protected function getDefaultModelNamespace()
+    {
+        $rootNamespace = $this->laravel->getNamespace();
+        return $rootNamespace.'Http\Models';
+    }
+
     /**
      * Build the class with the given name.
      *
@@ -233,7 +246,7 @@ class ControllerMakeCommand extends GeneratorCommand
         $model = trim(str_replace('/', '\\', $model), '\\');
 
         if (! Str::startsWith($model, $rootNamespace = $this->laravel->getNamespace())) {
-            $model = $rootNamespace.$model;
+            $model = $this->getDefaultModelNamespace().'\\'.$model;
         }
         return $model;
     }
