@@ -72,7 +72,9 @@ class EmployeeController extends Controller
     */
     public function edit($id)
     {
-    //
+        $record = Employee::find($id);
+        $columns = Employee::FIELDS;
+        return view('employee/update', compact('record','columns'));
     }
 
     /**

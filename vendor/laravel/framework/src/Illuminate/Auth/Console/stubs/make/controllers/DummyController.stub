@@ -72,7 +72,9 @@ class DummyController extends Controller
     */
     public function edit($id)
     {
-    //
+        $record = Dummy::find($id);
+        $columns = Dummy::FIELDS;
+        return view('dummy/update', compact('record','columns'));
     }
 
     /**
@@ -87,7 +89,7 @@ class DummyController extends Controller
         $record = Dummy::find($id);
         $data = $request->all();
         foreach (Dummy::FIELDS as $key => $val) {
-        $record->$key = $data[$key];
+            $record->$key = $data[$key];
         }
         $record->save();
         return redirect()->back()->with('success','Dummy updated successfully.');

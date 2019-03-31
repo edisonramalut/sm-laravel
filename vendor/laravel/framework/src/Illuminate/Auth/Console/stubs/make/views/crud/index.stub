@@ -45,7 +45,7 @@
     </div>
     <!-- Edit Modal HTML -->
     <div id="addDummyModal" class="modal fade">
-        <form action="/employee" method="POST">
+        <form action="/" method="POST">
             {{csrf_field()}}
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -107,10 +107,12 @@
         </div>
     </div>
     <!-- Delete Modal HTML -->
-    <div id="deleteDummyModal" class="modal fade">
+    <div id="deleteDummyModal" class="modal deleteModal fade">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form>
+                <form action="" id="deleteForm" method="POST">
+                    @method('DELETE')
+                    {{csrf_field()}}
                     <div class="modal-header">
                         <h4 class="modal-title">Delete Dummy</h4>
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -127,12 +129,4 @@
             </div>
         </div>
     </div>
-    <script type="javascript">
-        function openDelete(e) {
-            console.log($(e).data('id'));
-            var id = $(e).data('id');
-            $('#deleteForm').attr('action', '/dummy/'+id);
-            $('.deleteModal').modal('show');
-        }
-    </script>
 @endsection

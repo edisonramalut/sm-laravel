@@ -21,6 +21,7 @@
 
     <!-- Styles -->
     <link href="{{ asset('css/crud.css') }}" rel="stylesheet">
+    <script src="{{ asset('js/crud.js') }}"></script>
 </head>
 <body>
 <div id="app">
@@ -28,5 +29,7 @@
         @yield('content')
     </main>
 </div>
+@yield('js')
 </body>
+
 </html>

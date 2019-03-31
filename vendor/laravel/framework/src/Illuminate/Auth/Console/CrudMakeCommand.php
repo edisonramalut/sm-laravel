@@ -35,7 +35,7 @@ class CrudMakeCommand extends Command
      * @var array
      */
     protected $views = [
-        'layouts/crud.stub' => 'crud.blade.php'
+        'layouts/crud.stub' => 'layouts/crud.blade.php'
     ];
 
     /**
@@ -45,6 +45,15 @@ class CrudMakeCommand extends Command
      */
     protected $css = [
         'crud/css.stub' => 'crud.css',
+    ];
+
+    /**
+     * The js that need to be exported.
+     *
+     * @var array
+     */
+    protected $js = [
+        'crud/js.stub' => 'crud.js',
     ];
 
     /**
@@ -63,6 +72,7 @@ class CrudMakeCommand extends Command
 
         $modelViews = [
             'crud/index.stub' => class_basename($modelClass).'/index.blade.php',
+            'crud/update.stub' => class_basename($modelClass).'/update.blade.php',
         ];
         $this->views = array_merge($this->views, $modelViews);
 
@@ -74,6 +84,7 @@ class CrudMakeCommand extends Command
         $this->createDirectories(lcfirst(class_basename($modelClass)));
 
         $this->exportCss();
+        $this->exportJs();
         $this->exportViews($modelClass);
 
 
@@ -173,6 +184,7 @@ class CrudMakeCommand extends Command
 
             $replace = [
                 'Dummy' => class_basename($modelClass),
+                'dummy' => lcfirst(class_basename($modelClass)),
             ];
             file_put_contents(
                 $view,
@@ -213,15 +225,21 @@ class CrudMakeCommand extends Command
     protected function exportJs()
     {
         foreach ($this->js as $key => $value) {
-            if (file_exists($file = resource_path('js/'.$value)) && ! $this->option('force')) {
+            if (file_exists($view = public_path('js/'.$value)) && ! $this->option('force')) {
                 if (! $this->confirm("The [{$value}] file already exists. Do you want to replace it?")) {
                     continue;
                 }
             }
 
-            copy(
-                __DIR__.'/stubs/make/views/'.$key,
-                $view
+            $replace = [
+                'Dummy' => class_basename($modelClass),
+                'dummy' => lcfirst(class_basename($modelClass)),
+            ];
+            file_put_contents(
+                $view,
+                str_replace(
+                    array_keys($replace), array_values($replace),file_get_contents(__DIR__.'/stubs/make/views/'.$key)
+                )
             );
         }
     }
