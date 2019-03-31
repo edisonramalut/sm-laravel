@@ -84,7 +84,7 @@ class CrudMakeCommand extends Command
         $this->createDirectories(lcfirst(class_basename($modelClass)));
 
         $this->exportCss();
-        $this->exportJs();
+        $this->exportJs($modelClass);
         $this->exportViews($modelClass);
 
 
@@ -222,7 +222,7 @@ class CrudMakeCommand extends Command
      *
      * @return void
      */
-    protected function exportJs()
+    protected function exportJs($modelClass)
     {
         foreach ($this->js as $key => $value) {
             if (file_exists($view = public_path('js/'.$value)) && ! $this->option('force')) {
