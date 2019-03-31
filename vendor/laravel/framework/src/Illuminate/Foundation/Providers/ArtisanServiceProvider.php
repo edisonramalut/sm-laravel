@@ -2,6 +2,7 @@
 
 namespace Illuminate\Foundation\Providers;
 
+use Illuminate\Auth\Console\CrudMakeCommand;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Queue\Console\TableCommand;
 use Illuminate\Auth\Console\AuthMakeCommand;
@@ -128,6 +129,7 @@ class ArtisanServiceProvider extends ServiceProvider implements DeferrableProvid
     protected $devCommands = [
         'AppName' => 'command.app.name',
         'AuthMake' => 'command.auth.make',
+        'CrudMake' => 'command.crud.make',
         'CacheTable' => 'command.cache.table',
         'ChannelMake' => 'command.channel.make',
         'ConsoleMake' => 'command.console.make',
@@ -207,6 +209,18 @@ class ArtisanServiceProvider extends ServiceProvider implements DeferrableProvid
     {
         $this->app->singleton('command.auth.make', function () {
             return new AuthMakeCommand;
+        });
+    }
+
+    /**
+     * Register the command.
+     *
+     * @return void
+     */
+    protected function registerCrudMakeCommand()
+    {
+        $this->app->singleton('command.crud.make', function () {
+            return new CrudMakeCommand;
         });
     }
 

@@ -43,6 +43,13 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
     protected $table;
 
     /**
+     * The fields associated with the model.
+     *
+     * @var array
+     */
+    protected $fields = [];
+
+    /**
      * The primary key for the model.
      *
      * @var string

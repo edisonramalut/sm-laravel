@@ -10,4 +10,6 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
+Route::get('/test', 'HomeController@index');
 
+Route::resource('employee','EmployeeController');
